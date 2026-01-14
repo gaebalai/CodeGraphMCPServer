@@ -1,0 +1,275 @@
+"""
+Shared Test Fixtures
+====================
+
+모든 테스트에서 공유되는 픽스처.
+"""
+
+import tempfile
+from collections.abc import Generator
+from pathlib import Path
+
+import pytest
+
+
+# ========================
+# Temporary Directory Fixtures
+# ========================
+
+@pytest.fixture
+def temp_dir() -> Generator[Path, None, None]:
+    """一時ディレクトリを提供"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        yield Path(tmpdir)
+
+
+@pytest.fixture
+def temp_repo(temp_dir: Path) -> Generator[Path, None, None]:
+    """
+    임시 Git 리포지토리 제공
+
+    git init 된 디렉토리를 생성합니다.
+    """
+    import subprocess
+    subprocess.run(
+        ["git", "init"],
+        cwd=temp_dir,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=temp_dir,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=temp_dir,
+        capture_output=True,
+        check=True,
+    )
+    yield temp_dir
+
+
+# ========================
+# Sample Code Fixtures
+# ========================
+
+@pytest.fixture
+def sample_python_code() -> str:
+    """샘플 Python 코드"""
+    return '''
+"""Sample module for testing."""
+
+from typing import Optional
+
+
+class Person:
+    """A person class."""
+
+    def __init__(self, name: str, age: int):
+        self.name = name
+        self.age = age
+
+    def greet(self) -> str:
+        """Return a greeting message."""
+        return f"Hello, I am {self.name}"
+
+
+def calculate_sum(a: int, b: int) -> int:
+    """Calculate sum of two numbers."""
+    return a + b
+
+
+async def async_operation(value: Optional[str] = None) -> str:
+    """Async operation example."""
+    return value or "default"
+'''
+
+
+@pytest.fixture
+def sample_typescript_code() -> str:
+    """샘플 TypeScript 코드"""
+    return '''
+/**
+ * Sample TypeScript module for testing
+ */
+
+interface Person {
+    name: string;
+    age: number;
+}
+
+class Employee implements Person {
+    constructor(
+        public name: string,
+        public age: number,
+        private department: string
+    ) {}
+
+    greet(): string {
+        return `Hello, I am ${this.name}`;
+    }
+}
+
+function calculateSum(a: number, b: number): number {
+    return a + b;
+}
+
+export { Person, Employee, calculateSum };
+'''
+
+
+@pytest.fixture
+def sample_rust_code() -> str:
+    """샘플 Rust 코드"""
+    return '''
+//! Sample Rust module for testing
+
+use std::fmt;
+
+/// A person struct
+#[derive(Debug, Clone)]
+pub struct Person {
+    pub name: String,
+    pub age: u32,
+}
+
+impl Person {
+    /// Create a new person
+    pub fn new(name: impl Into<String>, age: u32) -> Self {
+        Self {
+            name: name.into(),
+            age,
+        }
+    }
+
+    /// Get a greeting message
+    pub fn greet(&self) -> String {
+        format!("Hello, I am {}", self.name)
+    }
+}
+
+impl fmt::Display for Person {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Person({}, {})", self.name, self.age)
+    }
+}
+
+/// Calculate sum of two numbers
+pub fn calculate_sum(a: i32, b: i32) -> i32 {
+    a + b
+}
+'''
+
+
+# ========================
+# Mock Data Fixtures
+# ========================
+
+@pytest.fixture
+def sample_entity_data() -> dict:
+    """샘플 엔티티 데이터"""
+    return {
+        "id": "test_entity_001",
+        "name": "TestClass",
+        "type": "class",
+        "file_path": "/test/sample.py",
+        "start_line": 10,
+        "end_line": 30,
+        "docstring": "A test class",
+    }
+
+
+@pytest.fixture
+def sample_relation_data() -> dict:
+    """샘플 관계 데이터"""
+    return {
+        "source_id": "test_entity_001",
+        "target_id": "test_entity_002",
+        "relation_type": "inherits",
+    }
+
+
+# ========================
+# Configuration Fixtures
+# ========================
+
+@pytest.fixture
+def test_config() -> dict:
+    """테스트 설정"""
+    return {
+        "storage": {
+            "db_path": ":memory:",
+            "cache_size": 100,
+        },
+        "parser": {
+            "languages": ["python"],
+            "max_file_size": 1_000_000,
+        },
+        "server": {
+            "host": "localhost",
+            "port": 8080,
+        },
+    }
+
+
+# ========================
+# Database Fixtures
+# ========================
+
+@pytest.fixture
+async def memory_db(temp_dir: Path):
+    """인메모리 SQLite 데이터베이스 (임시 파일 사용)"""
+    from codegraph_mcp.core.graph import GraphEngine
+
+    # Create .codegraph directory
+    codegraph_dir = temp_dir / ".codegraph"
+    codegraph_dir.mkdir(exist_ok=True)
+
+    engine = GraphEngine(temp_dir)
+    await engine.initialize()
+
+    yield engine
+
+    await engine.close()
+
+
+# ========================
+# MCP Server Fixtures
+# ========================
+
+@pytest.fixture
+async def mcp_server(temp_dir: Path):
+    """MCP 서버 인스턴스"""
+    from codegraph_mcp.config import Config
+    from codegraph_mcp.server import create_server
+
+    # Create .codegraph directory
+    codegraph_dir = temp_dir / ".codegraph"
+    codegraph_dir.mkdir(exist_ok=True)
+
+    config = Config(repo_path=temp_dir)
+    server = create_server(config)
+
+    yield server
+
+
+@pytest.fixture
+async def engine_manager(temp_dir: Path):
+    """EngineManager 인스턴스"""
+    from codegraph_mcp.core.engine_manager import EngineManager
+
+    # Clear any existing instances
+    EngineManager._instances.clear()
+
+    # Create .codegraph directory
+    codegraph_dir = temp_dir / ".codegraph"
+    codegraph_dir.mkdir(exist_ok=True)
+
+    manager = await EngineManager.get_instance(temp_dir)
+
+    yield manager
+
+    await EngineManager.close_all()

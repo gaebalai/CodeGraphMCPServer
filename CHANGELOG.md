@@ -34,6 +34,14 @@
 
 ---
 
+## [0.9.1] - 2026-01-15
+
+### 변경
+- GitHub Actions 릴리즈 워크플로에서 PyPI 배포가 Trusted Publishing(OIDC) 또는 PyPI API Token 방식으로 동작하도록 개선
+- GitHub Actions `environment` 의존 제거로 배포 설정 단순화
+
+---
+
 ## [0.7.0] - 2025-11-27
 
 ### 추가

@@ -1,35 +1,19 @@
-# Release Notes - v0.9.0
+# Release Notes - v0.9.1
 
-**릴리스 일자**: 2025-12-11
+**릴리스 일자**: 2026-01-15
 
-## 신규 언어 4종 추가 (Kotlin / Swift / Scala / Lua)
+## 릴리즈 파이프라인 안정화 (PyPI Trusted Publishing / Token 지원)
 
-CodeGraphMCPServer v0.9.0에서는 **Kotlin, Swift, Scala, Lua** 4개 언어 지원이 추가되어,  
-총 **16개 언어**를 지원하게 되었습니다.
+CodeGraphMCPServer v0.9.1에서는 GitHub Actions 릴리즈 워크플로의 PyPI 배포가
+Trusted Publishing(OIDC) 또는 PyPI API Token 방식으로 안정적으로 동작하도록 개선했습니다.
 
 ---
 
 ## 신규 기능
-
-### Kotlin 지원
-
-- 지원 확장자: `.kt`, `.kts`
-- 주요 추출: 클래스, 인터페이스, 객체, 함수, 프로퍼티
-
-### Swift 지원
-
-- 지원 확장자: `.swift`
-- 주요 추출: 클래스, 구조체, 프로토콜, 함수, 익스텐션
-
-### Scala 지원
-
-- 지원 확장자: `.scala`, `.sc`
-- 주요 추출: 클래스, 트레이트, 객체, 함수
-
-### Lua 지원
-
-- 지원 확장자: `.lua`
-- 주요 추출: 함수, 로컬 함수, 테이블 할당
+### PyPI 배포 개선
+- `PYPI_API_TOKEN`이 설정되어 있으면 토큰 방식으로 배포
+- `PYPI_API_TOKEN`이 없으면 Trusted Publishing(OIDC)으로 배포 시도
+- GitHub Actions `environment` 의존 없이 동작하도록 정리
 
 ---
 
@@ -43,7 +27,8 @@ CodeGraphMCPServer v0.9.0에서는 **Kotlin, Swift, Scala, Lua** 4개 언어 지
 | v0.5.0 | 2025-11-27 | 47x Performance (Batch DB) | 11 | 285 |
 | v0.6.0 | 2025-11-27 | Background Server Management | 11 | 285 |
 | v0.7.0 | 2025-11-27 | File Watch, GitHub Actions CI/CD | 12 | 308 |
-| **v0.9.0** | **2025-12-11** | **+Kotlin, Swift, Scala, Lua** | **16** | **334** |
+| v0.9.0 | 2025-12-11 | +Kotlin, Swift, Scala, Lua | 16 | 334 |
+| **v0.9.1** | **2026-01-15** | **CI: PyPI publish 안정화** | **16** | **334** |
 
 ---
 

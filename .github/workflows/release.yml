@@ -30,6 +30,7 @@ jobs:
     needs: test
     permissions:
       contents: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -71,8 +72,12 @@ jobs:
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
+      - name: Publish to PyPI (Trusted Publishing / OIDC)
+        if: ${{ secrets.PYPI_API_TOKEN == '' && vars.PYPI_TRUSTED_PUBLISHING == 'true' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+
       - name: Publish to PyPI (skipped - not configured)
-        if: ${{ secrets.PYPI_API_TOKEN == '' }}
+        if: ${{ secrets.PYPI_API_TOKEN == '' && vars.PYPI_TRUSTED_PUBLISHING != 'true' }}
         run: |
           echo "PyPI publish skipped."
           echo "To enable publishing, either:"

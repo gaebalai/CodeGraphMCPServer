@@ -65,7 +65,7 @@ jobs:
       # 1) API token (recommended for quick setup): add repository secret "PYPI_API_TOKEN"
       # 2) Trusted Publishing (OIDC): configure PyPI trusted publisher for this repo/workflow
       #
-      # We default to API token if present; otherwise we skip publishing to avoid a hard-fail.
+      # We default to API token if present; otherwise we publish via Trusted Publishing (OIDC).
       - name: Publish to PyPI (API token)
         if: ${{ secrets.PYPI_API_TOKEN != '' }}
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -73,13 +73,5 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Publish to PyPI (Trusted Publishing / OIDC)
-        if: ${{ secrets.PYPI_API_TOKEN == '' && vars.PYPI_TRUSTED_PUBLISHING == 'true' }}
+        if: ${{ secrets.PYPI_API_TOKEN == '' }}
         uses: pypa/gh-action-pypi-publish@release/v1
-
-      - name: Publish to PyPI (skipped - not configured)
-        if: ${{ secrets.PYPI_API_TOKEN == '' && vars.PYPI_TRUSTED_PUBLISHING != 'true' }}
-        run: |
-          echo "PyPI publish skipped."
-          echo "To enable publishing, either:"
-          echo " - Add GitHub secret PYPI_API_TOKEN (PyPI API token), or"
-          echo " - Configure PyPI Trusted Publisher for gaebalai/CodeGraphMCPServer and workflow .github/workflows/release.yml"
